@@ -1,0 +1,28 @@
+---
+- name: Download Elasticsearch Exporter binary
+  get_url:
+    url: "{{ elasticsearch_exporter_download_url }}"
+    dest: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+
+- name: Extract Elasticsearch Exporter binary
+  unarchive:
+    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+
+- name: Move Elasticsearch Exporter binary to install dir
+  copy:
+    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
+    dest: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
+    mode: '0755'
+
+- name: Create Elasticsearch Exporter service file
+  template:
+    src: elasticsearch_exporter.service.j2
+    dest: /etc/systemd/system/elasticsearch_exporter.service
+
+- name: Start Elasticsearch Exporter service
+  systemd:
+    name: elasticsearch_exporter
+    state: started
+    enabled: yes

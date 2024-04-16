@@ -1,0 +1,11 @@
+[Unit]
+Description=Elasticsearch Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter --es.uri http://{{ elasticsearch_node_ip }}:{{ elasticsearch_node_port }} --web.listen-address {{ elasticsearch_exporter_listen_address }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
