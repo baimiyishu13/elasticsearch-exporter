@@ -36,6 +36,7 @@
   shell: ps aux | grep elasticsearch_exporter | grep -v grep
   register: elasticsearch_exporter_process
   ignore_errors: true
+  failed_when: false
 
 #- name: Start Elasticsearch Exporter service (VM)
 #  systemd:
