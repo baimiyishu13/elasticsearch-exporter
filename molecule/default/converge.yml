@@ -2,6 +2,5 @@
 - name: Converge
   hosts: all
   become: true
-  gather_facts: no
   roles:
     - role: elasticsearch-exporter

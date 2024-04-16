@@ -1,18 +1,23 @@
 ---
+- name: Create a temporary directory
+  tempfile:
+    state: directory
+  register: temp_dir
+
 - name: Download Elasticsearch Exporter binary
   get_url:
     url: "{{ elasticsearch_exporter_download_url }}"
-    dest: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+    dest: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
 
 - name: Extract Elasticsearch Exporter binary
   unarchive:
-    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
-    dest: "/tmp"
+    src: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+    dest: "{{ temp_dir.path }}"
     remote_src: yes
 
 - name: Move Elasticsearch Exporter binary to install dir
   copy:
-    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
+    src: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
     dest: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
     mode: '0755'
 
@@ -26,3 +31,13 @@
     name: elasticsearch_exporter
     state: started
     enabled: yes
+
+- name: Get Elasticsearch Exporter service status
+  command: systemctl status elasticsearch_exporter
+  register: service_status
+  changed_when: false
+  ignore_errors: true
+
+- name: Print Elasticsearch Exporter service status
+  debug:
+    var: service_status.stdout_lines
