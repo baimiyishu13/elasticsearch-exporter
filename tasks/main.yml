@@ -27,11 +27,21 @@
     src: elasticsearch_exporter.service.j2
     dest: /etc/systemd/system/elasticsearch_exporter.service
 
-- name: Start Elasticsearch Exporter service
+- name: Gather facts
+  setup:
+
+- name: Start Elasticsearch Exporter service (VM)
   systemd:
     name: elasticsearch_exporter
     state: started
     enabled: yes
+  when: ansible_virtualization_type != 'docker'
+
+- name: Run Elasticsearch Exporter (Docker)
+  command:
+    cmd: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter &"
+    creates: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter.pid"
+  when: ansible_virtualization_type == 'docker'
 
 - name: Get Elasticsearch Exporter service status
   command: systemctl status elasticsearch_exporter
