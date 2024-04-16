@@ -47,6 +47,7 @@
 - name: Run Elasticsearch Exporter (Docker)
   shell:
     cmd: ls
+  when: elasticsearch_exporter_process.rc != 0
 
 #- name: Get Elasticsearch Exporter service status
 #  command: systemctl status elasticsearch_exporter
