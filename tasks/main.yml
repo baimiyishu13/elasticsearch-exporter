@@ -20,6 +20,7 @@
     src: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
     dest: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
     mode: '0755'
+    remote_src: yes
 
 - name: Create Elasticsearch Exporter service file
   template:
