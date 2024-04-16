@@ -35,15 +35,14 @@
 
 - name: Run Elasticsearch Exporter (Docker)
   command:
-    cmd: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter &"
+    cmd: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter --es.uri http://{{ elasticsearch_node_ip }}:{{ elasticsearch_node_port }} --web.listen-address {{ elasticsearch_exporter_listen_address }} &"
     creates: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter.pid"
-
-- name: Get Elasticsearch Exporter service status
-  command: systemctl status elasticsearch_exporter
-  register: service_status
-  changed_when: false
-  ignore_errors: true
-
-- name: Print Elasticsearch Exporter service status
-  debug:
-    var: service_status.stdout_lines
+#- name: Get Elasticsearch Exporter service status
+#  command: systemctl status elasticsearch_exporter
+#  register: service_status
+#  changed_when: false
+#  ignore_errors: true
+#
+#- name: Print Elasticsearch Exporter service status
+#  debug:
+#    var: service_status.stdout_lines
