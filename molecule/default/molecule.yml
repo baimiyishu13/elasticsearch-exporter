@@ -8,7 +8,7 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: "centos:centos7.9.2009"
+    image: ubuntu:18.04
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
