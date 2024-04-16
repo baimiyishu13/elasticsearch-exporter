@@ -26,18 +26,8 @@
     dest: /etc/systemd/system/elasticsearch_exporter.service
   when: not ('/etc/systemd/system/elasticsearch_exporter.service' is file)
 
-#- name: Start Elasticsearch Exporter service (VM)
-#  systemd:
-#    name: elasticsearch_exporter
-#    state: started
-#    enabled: yes
-
-#- name: Get Elasticsearch Exporter service status
-#  command: systemctl status elasticsearch_exporter
-#  register: service_status
-#  changed_when: false
-#  ignore_errors: true
-#
-#- name: Print Elasticsearch Exporter service status
-#  debug:
-#    var: service_status.stdout_lines
+- name: Start Elasticsearch Exporter service (VM)
+  systemd:
+    name: elasticsearch_exporter
+    state: started
+    enabled: yes
