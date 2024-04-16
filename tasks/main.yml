@@ -1,26 +1,20 @@
 ---
-- name: Create a temporary directory
-  tempfile:
-    state: directory
-  register: temp_dir
-  when: temp_dir.path is not defined
-
 - name: Download Elasticsearch Exporter binary
   get_url:
     url: "{{ elasticsearch_exporter_download_url }}"
-    dest: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
-  when: not (temp_dir.path ~ '/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64.tar.gz' is file)
+    dest: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+  when: not ('/tmp/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64.tar.gz' is file)
 
 - name: Extract Elasticsearch Exporter binary
   unarchive:
-    src: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
-    dest: "{{ temp_dir.path }}"
+    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+    dest: "/tmp"
     remote_src: yes
-  when: not (temp_dir.path ~ '/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64/elasticsearch_exporter' is file)
+  when: not ('/tmp/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64/elasticsearch_exporter' is file)
 
 - name: Move Elasticsearch Exporter binary to install dir
   copy:
-    src: "{{ temp_dir.path }}/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
+    src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
     dest: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
     mode: '0755'
     remote_src: yes
@@ -32,22 +26,11 @@
     dest: /etc/systemd/system/elasticsearch_exporter.service
   when: not ('/etc/systemd/system/elasticsearch_exporter.service' is file)
 
-- name: Check if Elasticsearch Exporter is running
-  shell: ps aux | grep elasticsearch_exporter | grep -v grep
-  register: elasticsearch_exporter_process
-  ignore_errors: true
-  failed_when: false
-
 #- name: Start Elasticsearch Exporter service (VM)
 #  systemd:
 #    name: elasticsearch_exporter
 #    state: started
 #    enabled: yes
-
-- name: Run Elasticsearch Exporter (Docker)
-  shell:
-    cmd: ls
-  when: elasticsearch_exporter_process.rc != 0
 
 #- name: Get Elasticsearch Exporter service status
 #  command: systemctl status elasticsearch_exporter
