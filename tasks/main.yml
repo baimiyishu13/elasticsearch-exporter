@@ -1,16 +1,31 @@
 ---
+- name: Check if Elasticsearch Exporter binary exists
+  stat:
+    path: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
+  register: elasticsearch_exporter_binary
+
 - name: Download Elasticsearch Exporter binary
   get_url:
     url: "{{ elasticsearch_exporter_download_url }}"
     dest: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
-  when: not ('/tmp/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64.tar.gz' is file)
+  when: not elasticsearch_exporter_binary.stat.exists
+
+- name: Check if Elasticsearch Exporter binary is extracted
+  stat:
+    path: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64/elasticsearch_exporter"
+  register: elasticsearch_exporter_extracted
 
 - name: Extract Elasticsearch Exporter binary
   unarchive:
     src: "/tmp/elasticsearch_exporter-{{ elasticsearch_exporter_version }}.linux-amd64.tar.gz"
     dest: "/tmp"
     remote_src: yes
-  when: not ('/tmp/elasticsearch_exporter-' ~ elasticsearch_exporter_version ~ '.linux-amd64/elasticsearch_exporter' is file)
+  when: not elasticsearch_exporter_extracted.stat.exists
+
+- name: Check if Elasticsearch Exporter binary is in install dir
+  stat:
+    path: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
+  register: elasticsearch_exporter_installed
 
 - name: Move Elasticsearch Exporter binary to install dir
   copy:
@@ -18,13 +33,18 @@
     dest: "{{ elasticsearch_exporter_install_dir }}/elasticsearch_exporter"
     mode: '0755'
     remote_src: yes
-  when: not (elasticsearch_exporter_install_dir ~ '/elasticsearch_exporter' is file)
+  when: not elasticsearch_exporter_installed.stat.exists
+
+- name: Check if Elasticsearch Exporter service file exists
+  stat:
+    path: "/etc/systemd/system/elasticsearch_exporter.service"
+  register: service_file
 
 - name: Create Elasticsearch Exporter service file
   template:
     src: elasticsearch_exporter.service.j2
     dest: /etc/systemd/system/elasticsearch_exporter.service
-  when: not ('/etc/systemd/system/elasticsearch_exporter.service' is file)
+  when: not service_file.stat.exists
 
 - name: Start Elasticsearch Exporter service (VM)
   systemd:
